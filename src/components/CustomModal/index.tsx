@@ -22,14 +22,14 @@ export function CustomModal({
 }: ReusableModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{modalTitle}</DialogTitle>
           {modalDescription && (
             <DialogDescription>{modalDescription}</DialogDescription>
           )}
         </DialogHeader>
-        <div className="py-4">
+        <div className="py-4 max-h-screen overflow-y-auto">
           {children}
         </div>
       </DialogContent>
