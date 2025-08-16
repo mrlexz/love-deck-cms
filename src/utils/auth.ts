@@ -3,8 +3,6 @@ export const logout = () => {
   localStorage.removeItem("loginTime");
   // Dispatch custom event to notify App component of auth change
   window.dispatchEvent(new Event('auth-changed'));
-  // Redirect to login page
-  window.location.href = "/login";
 };
 
 export const getRemainingLoginTime = (): number => {
