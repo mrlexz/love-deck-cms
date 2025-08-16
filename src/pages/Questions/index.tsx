@@ -8,8 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import CreateQuestionModal from "./components/CreateQuestionModal";
 import UpdateQuestionModal from "./components/UpdateQuestionModal";
 
-
-export const PaymentTable = () => {
+export const Questions = () => {
   const [isOpenCreate, setIsOpenCreate] = useState(false);
   const [isOpenEdit, setIsOpenEdit] = useState(false);
   const [question, setQuestion] = useState<Question | null>(null);
@@ -18,6 +17,7 @@ export const PaymentTable = () => {
   const [isGettingQuestion, setIsGettingQuestion] = useState(false);
 
   const [questions, setQuestions] = useState<Question[]>([]);
+
 
   const loadQuestions = async () => {
     setIsLoading(true);
