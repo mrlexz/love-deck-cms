@@ -5,7 +5,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import CoverImage from "../../../public/cover.png";
+import CoverImage from "./../../../public/images/Cover.png";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
