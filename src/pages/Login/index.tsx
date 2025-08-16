@@ -38,7 +38,7 @@ function Login() {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center">
+    <div className="flex h-full items-center justify-center">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <img src={CoverImage} alt="Logo" className="mx-auto w-[200px]" />
