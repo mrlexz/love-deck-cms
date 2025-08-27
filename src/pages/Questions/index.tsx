@@ -49,7 +49,7 @@ export const Questions = () => {
       });
       const data = await res.json();
       if (data.success) {
-        loadQuestions();
+        await loadQuestions();
       } else {
         alert("Error deleting question");
       }

@@ -104,7 +104,6 @@ function UpdateQuestionModal({
       const result = await res.json();
 
       if (result.success) {
-        alert("Question created successfully!");
         reset();
         if (callback) {
           callback();
