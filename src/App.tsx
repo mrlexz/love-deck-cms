@@ -1,10 +1,14 @@
 import { Route, BrowserRouter, Routes, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import "./App.css";
 import { Questions } from "./pages/Questions";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Layout from "./layouts";
+import QuestionsV2 from "./pages/QuestionsV2";
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 const ProtectedRoute = ({
   children,
@@ -85,6 +89,19 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Layout />}>
+          <Route
+            index
+            element={
+              <ProtectedRoute
+                isAuthenticated={isAuthenticated}
+                isLoading={isLoading}
+              >
+                <QuestionsV2 />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+        <Route path="/v2" element={<Layout />}>
           <Route
             index
             element={
