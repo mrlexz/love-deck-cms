@@ -4,18 +4,18 @@ import type { ColDef } from "ag-grid-community";
 import { Button } from "@/components/ui/button";
 import { Edit, Loader2, Trash } from "lucide-react";
 import CreateCategoryModal from "./components/CreateCategoryModal";
-import type { Category } from "@/types/category";
+import type { ICategory } from "@/types/category";
 import UpdateCategoryModal from "./components/UpdateCategoryModal";
 
 const Category = () => {
   const [isOpenCreate, setIsOpenCreate] = useState(false);
   const [isOpenEdit, setIsOpenEdit] = useState(false);
-  const [category, setCategory] = useState<Category | null>(null);
+  const [category, setCategory] = useState<ICategory | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isGettingQuestion, setIsGettingQuestion] = useState(false);
 
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<ICategory[]>([]);
 
   const loadListCategory = async () => {
     setIsLoading(true);

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Question } from "@/types/question";
-import type { Category } from "@/types/category";
+import type { ICategory } from "@/types/category";
 
 // Define form data type
 interface FormData {
@@ -156,7 +156,7 @@ function UpdateQuestionModal({
         }
       );
       const data = await res.json();
-      const options = data.data.map((category: Category) => ({
+      const options = data.data.map((category: ICategory) => ({
         value: category.id,
         label: category.name_vi,
       }));

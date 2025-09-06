@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import type { Category } from "@/types/category";
+import type { ICategory } from "@/types/category";
 
 // Define form data type
 interface FormData {
@@ -18,7 +18,7 @@ function UpdateCategoryModal({
   setIsOpenCreate,
   callback
 }: {
-  category: Category;
+  category: ICategory;
   isOpenCreate: boolean;
   setIsOpenCreate: (open: boolean) => void;
   callback?: () => void;
