@@ -19,4 +19,14 @@ export interface Question {
   example_en?: string;
   example_vi?: string;
   question_variant: QuestionVariant[];
+  topics_questions: {
+    id: string;
+    topic_id: string;
+    question_id: string;
+    topics: {
+      id: string;
+      name_en: string;
+      name_vi: string;
+    };
+  }[];
 }

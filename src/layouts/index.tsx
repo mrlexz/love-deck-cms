@@ -7,6 +7,7 @@ import {
   formatRemainingTime,
 } from "@/utils/auth";
 import { Button } from "@/components/ui/button";
+import { Menu } from "./Menu";
 
 const Layout = () => {
   const [remainingTime, setRemainingTime] = useState<string>("");
@@ -27,21 +28,24 @@ const Layout = () => {
   return (
     <div>
       <header>
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            onClick={() => {
-              if (confirm("Bạn có chắc chắn muốn đăng xuất?")) {
-                logout();
-              }
-            }}
-          >
-            <LogOut size={16} className="mr-2" />
-            Đăng xuất
-          </Button>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Clock size={16} />
-            <span>Phiên đăng nhập còn: {remainingTime}</span>
+        <div className="flex justify-between mb-4">
+          <Menu />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Clock size={16} />
+              <span>Phiên đăng nhập còn: {remainingTime}</span>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (confirm("Bạn có chắc chắn muốn đăng xuất?")) {
+                  logout();
+                }
+              }}
+            >
+              <LogOut size={16} className="mr-2" />
+              Đăng xuất
+            </Button>
           </div>
         </div>
       </header>

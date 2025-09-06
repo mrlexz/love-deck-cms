@@ -7,6 +7,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Layout from "./layouts";
 import QuestionsV2 from "./pages/QuestionsV2";
+import Category from "./pages/Category";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -97,6 +98,19 @@ function App() {
                 isLoading={isLoading}
               >
                 <QuestionsV2 />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+        <Route path="/category" element={<Layout />}>
+          <Route
+            index
+            element={
+              <ProtectedRoute
+                isAuthenticated={isAuthenticated}
+                isLoading={isLoading}
+              >
+                <Category />
               </ProtectedRoute>
             }
           />

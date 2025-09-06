@@ -6,7 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Category } from "@/types/category";
 
 // Define form data type
 interface FormData {
@@ -15,6 +16,7 @@ interface FormData {
   example_en: string;
   example_vi: string;
   question_type: string;
+  topic_id: string;
   options: Array<{
     text_en: string;
     text_vi: string;
@@ -24,14 +26,16 @@ interface FormData {
 function CreateQuestionModal({
   isOpenCreate,
   setIsOpenCreate,
-  callback
+  callback,
 }: {
   isOpenCreate: boolean;
   setIsOpenCreate: (open: boolean) => void;
   callback?: () => void;
 }) {
-
   const [loading, setLoading] = useState(false);
+
+  const [categoryOptions, setCategoryOptions] = useState<SelectOption[]>([]);
+  const [loadingCategory, setLoadingCategory] = useState(false);
 
   // Use React Hook Form for ALL form state
   const {
@@ -39,7 +43,7 @@ function CreateQuestionModal({
     handleSubmit,
     watch,
     reset,
-    formState: { errors, isSubmitting }
+    formState: { errors, isSubmitting },
   } = useForm<FormData>({
     defaultValues: {
       question_en: "",
@@ -48,6 +52,7 @@ function CreateQuestionModal({
       example_vi: "",
       question_type: "",
       options: [{ text_en: "", text_vi: "" }],
+      topic_id: "",
     },
   });
 
@@ -73,7 +78,10 @@ function CreateQuestionModal({
         return;
       }
 
-      if (data.question_type === "multiple_choice" && data.options.length === 0) {
+      if (
+        data.question_type === "multiple_choice" &&
+        data.options.length === 0
+      ) {
         alert("Please add at least one option for multiple choice questions");
         return;
       }
@@ -85,18 +93,23 @@ function CreateQuestionModal({
         example_en: data.example_en,
         example_vi: data.example_vi,
         question_variant_name: data.question_type,
-        question_variant_options: data.question_type === "multiple_choice" ? data.options : [],
+        question_variant_options:
+          data.question_type === "multiple_choice" ? data.options : [],
+        topic_id: data.topic_id,
       };
-      
+
       // API call
-      const res = await fetch("https://exslhvvumjuuypkyiwwm.supabase.co/functions/v1/add-question", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
+      const res = await fetch(
+        "https://exslhvvumjuuypkyiwwm.supabase.co/functions/v1/add-question",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const result = await res.json();
 
@@ -109,7 +122,6 @@ function CreateQuestionModal({
       } else {
         alert("Error creating question");
       }
-      
     } catch (error) {
       console.error("Error creating question:", error);
       alert("Error creating question");
@@ -122,6 +134,35 @@ function CreateQuestionModal({
     reset(); // Reset form when closing
     setIsOpenCreate(false);
   };
+
+  const loadListCategory = async () => {
+    setLoadingCategory(true);
+    try {
+      const res = await fetch(
+        "https://exslhvvumjuuypkyiwwm.supabase.co/functions/v1/category",
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_KEY}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await res.json();
+      const options = data.data.map((category: Category) => ({
+        value: category.id,
+        label: category.name_vi,
+      }));
+      setCategoryOptions(options);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingCategory(false);
+    }
+  };
+
+  useEffect(() => {
+    loadListCategory();
+  }, []);
 
   return (
     <CustomModal
@@ -148,7 +189,9 @@ function CreateQuestionModal({
               )}
             />
             {errors.question_en && (
-              <p className="text-sm text-red-500">{errors.question_en.message}</p>
+              <p className="text-sm text-red-500">
+                {errors.question_en.message}
+              </p>
             )}
           </div>
 
@@ -169,7 +212,9 @@ function CreateQuestionModal({
               )}
             />
             {errors.question_vi && (
-              <p className="text-sm text-red-500">{errors.question_vi.message}</p>
+              <p className="text-sm text-red-500">
+                {errors.question_vi.message}
+              </p>
             )}
           </div>
 
@@ -200,6 +245,25 @@ function CreateQuestionModal({
                   {...field}
                   id="example_vi"
                   placeholder="Enter example in Vietnamese (optional)"
+                />
+              )}
+            />
+          </div>
+
+          {/* Category */}
+          <div className="grid w-full gap-3">
+            <Label htmlFor="category">Danh mục</Label>
+            <Controller
+              name="topic_id"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  loading={loadingCategory}
+                  placeholder="Chọn danh mục"
+                  options={categoryOptions}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  error={errors.topic_id?.message}
                 />
               )}
             />
@@ -236,14 +300,21 @@ function CreateQuestionModal({
                       <Controller
                         name={`options.${index}.text_en`}
                         control={control}
-                        rules={{ 
-                          required: questionType === "multiple_choice" ? "English option is required" : false 
+                        rules={{
+                          required:
+                            questionType === "multiple_choice"
+                              ? "English option is required"
+                              : false,
                         }}
                         render={({ field }) => (
                           <Input
                             {...field}
                             placeholder="Nhập câu trả lời (Tiếng Anh)"
-                            className={errors.options?.[index]?.text_en ? "border-red-500" : ""}
+                            className={
+                              errors.options?.[index]?.text_en
+                                ? "border-red-500"
+                                : ""
+                            }
                           />
                         )}
                       />
@@ -253,19 +324,26 @@ function CreateQuestionModal({
                         </p>
                       )}
                     </div>
-                    
+
                     <div className="flex-1">
                       <Controller
                         name={`options.${index}.text_vi`}
                         control={control}
-                        rules={{ 
-                          required: questionType === "multiple_choice" ? "Vietnamese option is required" : false 
+                        rules={{
+                          required:
+                            questionType === "multiple_choice"
+                              ? "Vietnamese option is required"
+                              : false,
                         }}
                         render={({ field }) => (
                           <Input
                             {...field}
                             placeholder="Nhập câu trả lời (Tiếng Việt)"
-                            className={errors.options?.[index]?.text_vi ? "border-red-500" : ""}
+                            className={
+                              errors.options?.[index]?.text_vi
+                                ? "border-red-500"
+                                : ""
+                            }
                           />
                         )}
                       />
@@ -275,8 +353,8 @@ function CreateQuestionModal({
                         </p>
                       )}
                     </div>
-                    
-                    <Button 
+
+                    <Button
                       type="button"
                       variant="outline"
                       size="sm"
@@ -288,7 +366,7 @@ function CreateQuestionModal({
                   </div>
                 ))}
               </div>
-              
+
               <div className="flex justify-end">
                 <Button
                   type="button"
@@ -305,11 +383,7 @@ function CreateQuestionModal({
 
         {/* Form Actions */}
         <div className="flex justify-end gap-2 mt-6">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleClose}
-          >
+          <Button type="button" variant="outline" onClick={handleClose}>
             Hủy
           </Button>
           <Button
@@ -317,7 +391,7 @@ function CreateQuestionModal({
             disabled={isSubmitting || loading}
             className="bg-blue-500 hover:bg-blue-400"
           >
-            {(loading || isSubmitting) ? "Đang tạo..." : "Tạo"}
+            {loading || isSubmitting ? "Đang tạo..." : "Tạo"}
           </Button>
         </div>
       </form>

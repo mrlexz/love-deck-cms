@@ -29,7 +29,7 @@ export function CustomModal({
             <DialogDescription>{modalDescription}</DialogDescription>
           )}
         </DialogHeader>
-        <div className="py-4 max-h-screen overflow-y-auto">
+        <div className="py-4 max-h-[90vh] overflow-y-auto">
           {children}
         </div>
       </DialogContent>

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Edit, Loader2, Trash } from "lucide-react";
 import UpdateQuestionModal from "../Questions/components/UpdateQuestionModal";
 import CreateQuestionModal from "../Questions/components/CreateQuestionModal";
+import { formatDateTime } from "@/utils/time";
+import { CustomSelect, type SelectOption } from "@/components/CustomSelect";
 
 const QuestionsV2 = () => {
   const [isOpenCreate, setIsOpenCreate] = useState(false);
@@ -15,15 +17,43 @@ const QuestionsV2 = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isGettingQuestion, setIsGettingQuestion] = useState(false);
+  const [questionSets, setQuestionSets] = useState<SelectOption[]>([]);
 
   const [questions, setQuestions] = useState<Question[]>([]);
-  console.log("🚀 ~ QuestionsV2 ~ questions:", questions);
+  const [questionSetID, setQuestionSetID] = useState<string | null>(null);
 
-  const loadQuestions = async () => {
+  const loadQuestionSets = async () => {
     setIsLoading(true);
     try {
       const res = await fetch(
-        "https://exslhvvumjuuypkyiwwm.supabase.co/functions/v1/add-question",
+        "https://exslhvvumjuuypkyiwwm.supabase.co/functions/v1/question-set",
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_KEY}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await res.json();
+      const options = data.data.map((questionSet: { id: string; name_vi: string }) => ({
+        value: questionSet.id,
+        label: questionSet.name_vi,
+      }));
+      setQuestionSets(options);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadQuestions = async (questionSetIDParam?: string | null) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(
+        `https://exslhvvumjuuypkyiwwm.supabase.co/functions/v1/add-question?question_set_id=${
+          questionSetIDParam || ""
+        }`,
         {
           headers: {
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_KEY}`,
@@ -88,12 +118,12 @@ const QuestionsV2 = () => {
   };
 
   useEffect(() => {
-    loadQuestions();
+    loadQuestions(questionSetID);
+  }, [questionSetID]);
+
+  useEffect(() => {
+    loadQuestionSets();
   }, []);
-  // Row Data: The data to be displayed.
-  // const { data, loading } = useFetchJson<IRow>(
-  //   "https://www.ag-grid.com/example-assets/space-mission-data.json"
-  // );
 
   // Column Definitions: Defines & controls grid columns.
   const [colDefs] = useState<ColDef[]>([
@@ -131,6 +161,14 @@ const QuestionsV2 = () => {
       ),
     },
     {
+      field: "topics_questions[0].topics.name_vi",
+      headerName: "Danh mục",
+      width: 200,
+      valueGetter: (params) => {
+        return params.data.topics_questions?.[0]?.topics?.name_vi || "";
+      },
+    },
+    {
       field: "question_en",
       headerName: "Câu hỏi tiếng Anh",
       flex: 1,
@@ -164,39 +202,48 @@ const QuestionsV2 = () => {
       },
     },
     {
-      field: "example_en",
-      headerName: "Ví dụ (Tiếng Anh)",
-      width: 300,
-      flex: 1,
-      minWidth: 300,
-      wrapText: true,
-      autoHeight: true,
-      cellStyle: {
-        padding: "10px",
-        whiteSpace: "normal",
-        lineHeight: "1.5",
-        display: "flex",
-        alignItems: "flex-start",
-        textAlign: "start",
+      field: "updated_at",
+      headerName: "Cập nhật lúc",
+      width: 200,
+      valueGetter: (params) => {
+        return formatDateTime(params.data.updated_at);
       },
     },
-    {
-      field: "example_vi",
-      headerName: "Ví dụ (Tiếng Việt)",
-      width: 300,
-      flex: 1,
-      minWidth: 300,
-      wrapText: true,
-      autoHeight: true,
-      cellStyle: {
-        padding: "10px",
-        whiteSpace: "normal",
-        lineHeight: "1.5",
-        display: "flex",
-        alignItems: "flex-start",
-        textAlign: "start",
-      },
-    },
+    // {
+    //   field: "example_en",
+    //   headerName: "Ví dụ (Tiếng Anh)",
+    //   width: 300,
+    //   flex: 1,
+    //   minWidth: 300,
+    //   wrapText: true,
+    //   autoHeight: true,
+    //   cellStyle: {
+    //     padding: "10px",
+    //     whiteSpace: "normal",
+    //     lineHeight: "1.5",
+    //     display: "flex",
+    //     alignItems: "flex-start",
+    //     textAlign: "start",
+    //   },
+    // },
+    // {
+    //   field: "example_vi",
+    //   headerName: "Ví dụ (Tiếng Việt)",
+    //   width: 300,
+    //   flex: 1,
+    //   minWidth: 300,
+    //   wrapText: true,
+    //   autoHeight: true,
+    //   cellStyle: {
+    //     padding: "10px",
+    //     whiteSpace: "normal",
+    //     lineHeight: "1.5",
+    //     display: "flex",
+    //     alignItems: "flex-start",
+    //     textAlign: "start",
+    //   },
+    // },
+
     {
       field: "id",
       headerName: "Hành động",
@@ -241,7 +288,13 @@ const QuestionsV2 = () => {
   // Container: Defines the grid's theme & dimensions.
   return (
     <>
-      <div className="flex justify-end">
+      <div className="flex justify-between">
+        <CustomSelect
+          placeholder="Chọn bộ bài"
+          options={questionSets}
+          value={questionSetID || ""}
+          onValueChange={(value) => setQuestionSetID(value)}
+        />
         <Button onClick={() => setIsOpenCreate(true)}>Thêm mới câu hỏi</Button>
       </div>
       <div className="w-full h-[80vh] mt-4">
