@@ -17,6 +17,7 @@ interface FormData {
   example_vi: string;
   question_type: string;
   topic_id: string;
+  question_set_id: string;
   options: Array<{
     text_en: string;
     text_vi: string;
@@ -37,6 +38,11 @@ function CreateQuestionModal({
   const [categoryOptions, setCategoryOptions] = useState<SelectOption[]>([]);
   const [loadingCategory, setLoadingCategory] = useState(false);
 
+  const [questionSetOptions, setQuestionSetOptions] = useState<SelectOption[]>(
+    []
+  );
+  const [loadingQuestionSet, setLoadingQuestionSet] = useState(false);
+
   // Use React Hook Form for ALL form state
   const {
     control,
@@ -53,6 +59,7 @@ function CreateQuestionModal({
       question_type: "",
       options: [{ text_en: "", text_vi: "" }],
       topic_id: "",
+      question_set_id: "",
     },
   });
 
@@ -96,6 +103,7 @@ function CreateQuestionModal({
         question_variant_options:
           data.question_type === "multiple_choice" ? data.options : [],
         topic_id: data.topic_id,
+        question_set_id: data.question_set_id,
       };
 
       // API call
@@ -160,8 +168,36 @@ function CreateQuestionModal({
     }
   };
 
+  const loadListQuestionSet = async () => {
+    setLoadingQuestionSet(true);
+    try {
+      const res = await fetch(
+        "https://exslhvvumjuuypkyiwwm.supabase.co/functions/v1/question-set",
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_KEY}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await res.json();
+      const options = data.data.map(
+        (questionSet: { id: string; name_vi: string }) => ({
+          value: questionSet.id,
+          label: questionSet.name_vi,
+        })
+      );
+      setQuestionSetOptions(options);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingQuestionSet(false);
+    }
+  };
+
   useEffect(() => {
     loadListCategory();
+    loadListQuestionSet();
   }, []);
 
   return (
@@ -251,22 +287,41 @@ function CreateQuestionModal({
           </div>
 
           {/* Category */}
-          <div className="grid w-full gap-3">
-            <Label htmlFor="category">Danh mục</Label>
-            <Controller
-              name="topic_id"
-              control={control}
-              render={({ field }) => (
-                <CustomSelect
-                  loading={loadingCategory}
-                  placeholder="Chọn danh mục"
-                  options={categoryOptions}
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  error={errors.topic_id?.message}
-                />
-              )}
-            />
+          <div className="flex w-full gap-3">
+            <div className="flex-1 flex flex-col gap-2">
+              <Label htmlFor="category">Danh mục</Label>
+              <Controller
+                name="topic_id"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    loading={loadingCategory}
+                    placeholder="Chọn danh mục"
+                    options={categoryOptions}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    error={errors.topic_id?.message}
+                  />
+                )}
+              />
+            </div>
+            <div className="flex-1 flex flex-col gap-2">
+              <Label htmlFor="question_set_id">Bộ bài</Label>
+              <Controller
+                name="question_set_id"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    loading={loadingQuestionSet}
+                    placeholder="Chọn bộ bài"
+                    options={questionSetOptions}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    error={errors.question_set_id?.message}
+                  />
+                )}
+              />
+            </div>
           </div>
 
           {/* Question Type */}

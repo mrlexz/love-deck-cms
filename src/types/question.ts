@@ -29,4 +29,5 @@ export interface Question {
       name_vi: string;
     };
   }[];
+  question_set_id?: string;
 }

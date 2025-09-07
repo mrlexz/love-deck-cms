@@ -40,6 +40,7 @@ const QuestionsV2 = () => {
         label: questionSet.name_vi,
       }));
       setQuestionSets(options);
+      setQuestionSetID(options[options.length - 1]?.value);
     } catch (error) {
       console.log(error);
     } finally {

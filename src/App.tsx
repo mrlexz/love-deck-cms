@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Layout from "./layouts";
 import QuestionsV2 from "./pages/QuestionsV2";
 import Category from "./pages/Category";
+import QuestionSet from "./pages/QuestionSet";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -111,6 +112,19 @@ function App() {
                 isLoading={isLoading}
               >
                 <Category />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+        <Route path="/question-set" element={<Layout />}>
+          <Route
+            index
+            element={
+              <ProtectedRoute
+                isAuthenticated={isAuthenticated}
+                isLoading={isLoading}
+              >
+                <QuestionSet />
               </ProtectedRoute>
             }
           />
